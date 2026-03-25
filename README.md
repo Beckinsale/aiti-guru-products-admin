@@ -1,73 +1,70 @@
-# React + TypeScript + Vite
+# Aiti Guru — Admin Panel
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Тестовое задание: административная панель управления товарами. Включает авторизацию через DummyJSON API и таблицу товаров с поиском, сортировкой и добавлением.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Технологический стек
 
-## React Compiler
+| Библиотека | Почему |
+|------------|--------|
+| React 19 + Vite | Современный стек, быстрый dev-сервер, нативный ESM |
+| TypeScript strict | Типобезопасность без компромиссов, нет `any` |
+| TanStack Query v5 | Загрузка данных, кэш, loading/error из коробки, `useSuspenseQuery` |
+| React Hook Form + Zod | Zod-схема — единственный источник истины: валидация + тип через `z.infer` |
+| React Router v6 | Protected routes, `useSearchParams` для хранения состояния сортировки в URL |
+| Tailwind CSS | Утилитарная стилизация без CSS-файлов |
+| Sonner | Минималистичные toast-уведомления |
+| Shadcn/UI | Готовые доступные компоненты (Checkbox, Dialog, Button, Input) |
+| Vitest + React Testing Library | Нативная интеграция с Vite, быстрее Jest, ESM-native |
+| Playwright | E2E тесты |
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## Как запустить
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev     # → http://localhost:5173
+npm run build   # production-сборка
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+**Тестовые учётные данные:** `emilys` / `emilyspass`
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Запустить тесты:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run test         # unit-тесты (Vitest)
+npx playwright test  # E2E тесты (Playwright)
 ```
+
+---
+
+## Что реализовано
+
+- **Авторизация** — логин + пароль, валидация обязательных полей, сообщение об ошибке API под полями
+- **«Запомнить меня»** — токен в `localStorage` (checked) или `sessionStorage` (unchecked)
+- **Protected route** — без токена `/products` → редирект на `/login`
+- **Таблица товаров** — колонки: изображение, наименование, вендор, артикул, оценка, цена
+- **Skeleton-экраны** — при загрузке вместо спиннера
+- **ErrorState** — при ошибке API: "Не удалось загрузить данные" + кнопка "Повторить"
+- **Поиск** — через DummyJSON API (`/products/search?q=`), debounce 300 мс
+- **Сортировка** — по цене и оценке (asc/desc), состояние в URL-параметрах
+- **Красный рейтинг** — оценка < 3.5 отображается красным
+- **Кнопка "Обновить"** — инвалидирует кэш TanStack Query, перезагружает данные
+- **Модал "Добавить товар"** — форма с полями: наименование, цена, вендор, артикул
+- **Toast** — `toast.success('Товар добавлен')` при отправке формы
+
+---
+
+## Особенности реализации
+
+**«Запомнить меня»:** при входе с галочкой токен сохраняется в `localStorage` — сессия сохраняется после закрытия браузера. Без галочки — `sessionStorage`, сессия сбрасывается при закрытии вкладки.
+
+**Сортировка в URL:** состояние сортировки хранится в `?sortBy=price&order=asc`. При перезагрузке страницы или шаринге ссылки сортировка сохраняется.
+
+**Suspense + ErrorBoundary:** таблица обёрнута в `<Suspense fallback={<SkeletonTable />}>` + `<ErrorBoundary>`. Loading и error state обрабатываются декларативно без `isLoading`/`isError` флагов в компоненте.
+
+**Добавление товара:** форма не делает API-запрос и не добавляет товар в таблицу — согласно ТЗ.
+
+**AI использование:** промпты и сгенерированные фрагменты задокументированы в [AI_USAGE.md](./AI_USAGE.md).

@@ -1,6 +1,7 @@
 // @req FR-AUTH-002
-import { createContext, useState, type ReactNode } from 'react'
+import { createContext, useState, useEffect, type ReactNode } from 'react'
 import { getToken, saveToken, clearToken } from '@/features/auth/utils/tokenStorage'
+import { setUnauthorizedHandler } from '@/shared/api/axiosInstance'
 
 interface AuthContextValue {
   token: string | null
@@ -22,6 +23,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     clearToken()
     setToken(null)
   }
+
+  useEffect(() => {
+    setUnauthorizedHandler(logout)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <AuthContext.Provider value={{ token, login, logout }}>

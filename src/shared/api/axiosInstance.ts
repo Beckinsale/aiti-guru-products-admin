@@ -6,6 +6,12 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 })
 
+let unauthorizedHandler: (() => void) | null = null
+
+export const setUnauthorizedHandler = (handler: () => void): void => {
+  unauthorizedHandler = handler
+}
+
 api.interceptors.request.use((config) => {
   const token = getToken()
   if (token) {
@@ -13,5 +19,15 @@ api.interceptors.request.use((config) => {
   }
   return config
 })
+
+api.interceptors.response.use(
+  (response) => response,
+  (error: unknown) => {
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      unauthorizedHandler?.()
+    }
+    return Promise.reject(error)
+  },
+)
 
 export default api
