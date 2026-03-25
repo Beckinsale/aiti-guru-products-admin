@@ -1,6 +1,5 @@
-// @req FR-AUTH-002
 import { useContext } from 'react'
-import { AuthContext } from '@/features/auth/components/AuthProvider'
+import { AuthContext } from '@/features/auth/context/AuthContext'
 
 export const useAuthContext = () => {
   const ctx = useContext(AuthContext)

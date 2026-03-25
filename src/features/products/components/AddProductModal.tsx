@@ -24,8 +24,7 @@ export const AddProductModal = ({ open, onClose }: AddProductModalProps) => {
     defaultValues: { title: '', price: undefined, brand: '', sku: '' },
   })
 
-  const onSubmit = (_values: AddProductFormValues) => {
-    // @req FR-PROD-006 — local state only, no API call, no table update
+  const onSubmit = () => {
     toast.success('Товар добавлен')
     reset()
     onClose()

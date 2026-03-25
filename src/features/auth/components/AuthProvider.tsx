@@ -1,32 +1,24 @@
-// @req FR-AUTH-002
-import { createContext, useState, useEffect, type ReactNode } from 'react'
+import { useState, useCallback, useEffect, type ReactNode } from 'react'
+import { AuthContext } from '@/features/auth/context/AuthContext'
 import { getToken, saveToken, clearToken } from '@/features/auth/utils/tokenStorage'
 import { setUnauthorizedHandler } from '@/shared/api/axiosInstance'
-
-interface AuthContextValue {
-  token: string | null
-  login: (token: string, remember: boolean) => void
-  logout: () => void
-}
-
-export const AuthContext = createContext<AuthContextValue | null>(null)
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [token, setToken] = useState<string | null>(() => getToken())
 
-  const login = (newToken: string, remember: boolean) => {
+  const login = useCallback((newToken: string, remember: boolean) => {
     saveToken(newToken, remember)
     setToken(newToken)
-  }
+  }, [])
 
-  const logout = () => {
+  const logout = useCallback(() => {
     clearToken()
     setToken(null)
-  }
+  }, [])
 
   useEffect(() => {
     setUnauthorizedHandler(logout)
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [logout])
 
   return (
     <AuthContext.Provider value={{ token, login, logout }}>
