@@ -93,7 +93,7 @@ export const ProductRow = memo(({ product, isSelected, onSelect }: ProductRowPro
             <Plus className="h-4 w-4 text-white" />
           </button>
           <button
-            className="flex items-center justify-center w-[32px] h-[32px] rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
+            className="flex items-center justify-center w-[32px] h-[32px] rounded-full border border-[#ececeb] hover:bg-gray-50 transition-colors cursor-pointer"
             aria-label="Действия"
           >
             <MoreHorizontal className="h-5 w-5 text-[#b2b3b9]" />

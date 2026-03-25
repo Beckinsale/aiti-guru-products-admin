@@ -17,6 +17,8 @@ export const useProducts = ({ query, sortBy, order }: UseProductsParams) => {
       const url = query
         ? `/products/search?q=${encodeURIComponent(query)}&limit=100`
         : '/products?limit=100'
+      // Note: DummyJSON search API searches only in 'title' and 'description',
+      // not in 'brand' or 'category' fields
       const res = await api.get<ProductsResponse>(url)
       return res.data.products
     },
